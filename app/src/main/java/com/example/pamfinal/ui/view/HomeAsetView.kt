@@ -17,6 +17,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -36,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.pamfinal.R
 import com.example.pamfinal.model.Aset
 import com.example.pamfinal.navigation.DestinasiNavigasi
@@ -55,6 +57,7 @@ fun HomeAsetScreen(
     navigateToItemEntry: () -> Unit,
     modifier: Modifier = Modifier,
     onDetailClick: (String) -> Unit = {},
+    navController: NavController,
     viewModel: HomeAsetViewModel = viewModel(factory = PenyediaViewModel.Factory)
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
@@ -82,12 +85,13 @@ fun HomeAsetScreen(
         HomeAsetStatus(
             homeUiState = viewModel.astUIState,
             retryAction = { viewModel.getAst() },
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier.padding(innerPadding).padding(top = 0.dp),
             onDetailClick = onDetailClick,
             onDeleteClick = {
                 viewModel.deleteAst(it.id_aset)
                 viewModel.getAst()
-            }
+            },
+            navController = navController
         )
     }
 }
@@ -98,7 +102,8 @@ fun HomeAsetStatus(
     retryAction: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteClick: (Aset) -> Unit = {},
-    onDetailClick: (String) -> Unit
+    onDetailClick: (String) -> Unit,
+    navController: NavController
 ) {
     when (homeUiState) {
         is HomeAsetUiState.Loading -> {
@@ -114,7 +119,8 @@ fun HomeAsetStatus(
                     aset = homeUiState.aset,
                     modifier = modifier.fillMaxWidth(),
                     onDetailClick = { onDetailClick(it.id_aset) },
-                    onDeleteClick = { onDeleteClick(it) }
+                    onDeleteClick = { onDeleteClick(it) },
+                    navController = navController
                 )
             }
         }
@@ -159,11 +165,12 @@ fun AsetLayout(
     aset: List<Aset>,
     modifier: Modifier = Modifier,
     onDetailClick: (Aset) -> Unit,
-    onDeleteClick: (Aset) -> Unit = {}
+    onDeleteClick: (Aset) -> Unit = {},
+    navController: NavController
 ) {
     LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(16.dp),
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(top = 16.dp, start = 16.dp, end = 16.dp, bottom = 0.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(aset) { aset ->
@@ -172,7 +179,11 @@ fun AsetLayout(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onDetailClick(aset) },
-                onDeleteClick = { onDeleteClick(aset) }
+                onDeleteClick = { onDeleteClick(aset) },
+                onEditClick = {
+                    // Navigating to the update screen when edit is clicked
+                    navController.navigate("${DestinasiAsetUpdate.route}/${aset.id_aset}")
+                }
             )
         }
     }
@@ -182,7 +193,8 @@ fun AsetLayout(
 fun AstCard(
     aset: Aset,
     modifier: Modifier = Modifier,
-    onDeleteClick: (Aset) -> Unit = {}
+    onDeleteClick: (Aset) -> Unit = {},
+    onEditClick: (Aset) -> Unit
 ) {
     Card(
         modifier = modifier,
@@ -198,7 +210,7 @@ fun AstCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = aset.nama_aset,
+                    text = aset.nama_aset  ,
                     style = MaterialTheme.typography.titleLarge,
                 )
                 Spacer(Modifier.weight(1f))
@@ -208,11 +220,20 @@ fun AstCard(
                         contentDescription = null,
                     )
                 }
+
+                // Edit IconButton
+                IconButton(onClick = {onEditClick(aset) }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit"
+                    )
+                }
                 Text(
                     text = aset.id_aset,
                     style = MaterialTheme.typography.titleMedium
                 )
             }
+
         }
     }
 }
