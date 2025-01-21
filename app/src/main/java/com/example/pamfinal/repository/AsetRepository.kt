@@ -9,6 +9,7 @@ interface AsetRepository{
     suspend fun insertAset(aset: Aset)
     suspend fun updateAset(id_aset: String, aset: Aset)
     suspend fun deleteAset(id_aset: String)
+    suspend fun getAsetById(id_aset: String): Aset
 }
 
 class NetworkAsetRepository(
@@ -37,5 +38,14 @@ class NetworkAsetRepository(
     }
 
     override suspend fun getAset(): List<Aset> = asetApiService.getAset()
+
+    override suspend fun getAsetById(id_aset: String): Aset {
+        try {
+            return asetApiService.getAsetById(id_aset)
+        } catch (e: IOException){
+            throw IOException("Failed to fetch aset with ID Aset: $id_aset. Network error occurred.", e)
+        }
+
+    }
 
 }
