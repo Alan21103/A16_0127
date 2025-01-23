@@ -1,4 +1,4 @@
-package com.example.pamfinal.ui.view
+package com.example.pamfinal.ui.view.aset
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -42,18 +42,19 @@ import com.example.pamfinal.R
 import com.example.pamfinal.model.Aset
 import com.example.pamfinal.navigation.DestinasiNavigasi
 import com.example.pamfinal.ui.customwidget.CostumeTopAppBar
-import com.example.pamfinal.ui.viewmodel.HomeAsetUiState
-import com.example.pamfinal.ui.viewmodel.HomeAsetViewModel
+import com.example.pamfinal.ui.viewmodel.aset.HomeAsetUiState
+import com.example.pamfinal.ui.viewmodel.aset.HomeAsetViewModel
 import com.example.pamfinal.ui.viewmodel.PenyediaViewModel
 
 object DestinasiHomeAset : DestinasiNavigasi {
-    override val route = "home"
+    override val route = "home_aset"
     override val titleRes = "Home Aset"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeAsetScreen(
+    navigateBack: () -> Unit,
     navigateToItemEntry: () -> Unit,
     modifier: Modifier = Modifier,
     onDetailClick: (String) -> Unit = {},
@@ -67,7 +68,8 @@ fun HomeAsetScreen(
         topBar = {
             CostumeTopAppBar(
                 title = DestinasiHomeAset.titleRes,
-                canNavigateBack = false,
+                canNavigateBack = true,
+                navigateUp = navigateBack,
                 scrollBehavior = scrollBehavior,
                 onRefresh = { viewModel.getAst() }
             )
