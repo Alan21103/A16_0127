@@ -26,14 +26,15 @@ class HomeKategoriViewModel(private val ktg: KategoriRepository): ViewModel(){
         getKtg()
     }
 
-    fun    getKtg(){
+    fun getKtg() {
         viewModelScope.launch {
             ktgUIState = HomeKategoriUiState.Loading
             ktgUIState = try {
-                HomeKategoriUiState.Success(ktg.getKategori())
-            } catch (e: IOException){
+                val kategoriList = ktg.getKategori()
+                HomeKategoriUiState.Success(kategoriList)
+            } catch (e: IOException) {
                 HomeKategoriUiState.Error
-            }catch (e: HttpException){
+            } catch (e: HttpException) {
                 HomeKategoriUiState.Error
             }
         }
