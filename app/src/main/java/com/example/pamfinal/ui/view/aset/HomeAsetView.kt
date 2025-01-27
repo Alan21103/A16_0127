@@ -1,6 +1,7 @@
 package com.example.pamfinal.ui.view.aset
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,15 +13,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -30,8 +35,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -63,15 +71,21 @@ fun HomeAsetScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
+    LaunchedEffect(Unit) {
+        viewModel.getAst()
+    }
+
     Scaffold(
-        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .background(Color(0xFF003153)),
         topBar = {
             CostumeTopAppBar(
                 title = DestinasiHomeAset.titleRes,
                 canNavigateBack = true,
                 navigateUp = navigateBack,
                 scrollBehavior = scrollBehavior,
-                onRefresh = { viewModel.getAst() }
+                onRefresh = { viewModel.getAst() },
             )
         },
         floatingActionButton = {
@@ -84,19 +98,26 @@ fun HomeAsetScreen(
             }
         }
     ) { innerPadding ->
-        HomeAsetStatus(
-            homeUiState = viewModel.astUIState,
-            retryAction = { viewModel.getAst() },
-            modifier = Modifier.padding(innerPadding).padding(top = 0.dp),
-            onDetailClick = onDetailClick,
-            onDeleteClick = {
-                viewModel.deleteAst(it.id_aset)
-                viewModel.getAst()
-            },
-            navController = navController
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            HomeAsetStatus(
+                homeUiState = viewModel.astUIState,
+                retryAction = { viewModel.getAst() },
+                modifier = Modifier.padding(top = 0.dp),
+                onDetailClick = onDetailClick,
+                onDeleteClick = {
+                    viewModel.deleteAst(it.id_aset)
+                    viewModel.getAst()
+                },
+                navController = navController
+            )
+        }
     }
 }
+
 
 @Composable
 fun HomeAsetStatus(
@@ -196,12 +217,14 @@ fun AstCard(
     aset: Aset,
     modifier: Modifier = Modifier,
     onDeleteClick: (Aset) -> Unit = {},
-    onEditClick: (Aset) -> Unit
+    onEditClick: (Aset) -> Unit,
+    onDetailClick: (Aset) -> Unit = {}
 ) {
     Card(
         modifier = modifier,
         shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -212,30 +235,31 @@ fun AstCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = aset.nama_aset  ,
+                    text = aset.nama_aset,
                     style = MaterialTheme.typography.titleLarge,
                 )
                 Spacer(Modifier.weight(1f))
+                IconButton(onClick = { onEditClick(aset) }) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = MaterialTheme.colorScheme.secondary
+                    )
+                }
                 IconButton(onClick = { onDeleteClick(aset) }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = null,
+                        contentDescription = "Delete",
+                        tint = MaterialTheme.colorScheme.error
                     )
                 }
-
-                // Edit IconButton
-                IconButton(onClick = {onEditClick(aset) }) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit"
-                    )
-                }
-                Text(
-                    text = aset.id_aset,
-                    style = MaterialTheme.typography.titleMedium
-                )
             }
-
+            Divider()
+            Text(
+                text = aset.id_aset,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
